@@ -3,6 +3,7 @@
 	import '../styles.css';
 	import '../../app.css';
 
+	import { logout } from '$lib/auth';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { onAuthStateChange } from '$lib/auth';
@@ -14,6 +15,7 @@
 				goto('/account/login'); // If user doesn't exist, redirect them to sign in
 			} else {
 				const userData = await getUserData();
+				console.log(userData);
 				if (!userData) goto('/account/register'); // If user exists, but they don't have any data on them, take them to register
 			}
 		});
@@ -26,7 +28,13 @@
 	<Header />
 
 	<main>
-		<slot />
+		<section>
+			<button
+				on:click={logout}
+				class="text-white bg-gradient-to-br from-indigo-600 to-indigo-800 hover:bg-gradient-to-br hover:from-indigo-700 hover:to-indigo-900 h-10 ml-1 my-1 rounded"
+				><p class="px-5 py-2">Log out</p></button
+			>
+		</section>
 	</main>
 
 	<footer>
@@ -54,6 +62,14 @@
 		max-width: 64rem;
 		margin: 0 auto;
 		box-sizing: border-box;
+	}
+
+	section {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		flex: 0.6;
 	}
 
 	footer {

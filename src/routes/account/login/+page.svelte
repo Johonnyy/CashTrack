@@ -5,6 +5,12 @@
 	import AuthForm from './AuthForm.svelte';
 </script>
 
+<head>
+	<title>Login</title>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
 <div class="app bg-stone-900">
 	<div />
 

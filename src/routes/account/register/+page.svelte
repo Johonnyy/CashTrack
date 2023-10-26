@@ -1,32 +1,23 @@
-<script lang="ts">
-	import Header from '$lib/components/Header.svelte';
-	import '../styles.css';
-	import '../../app.css';
+<script>
+	import '../../styles.css';
+	import '../../../app.css';
 
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { onAuthStateChange } from '$lib/auth';
-	import { getUserData } from '$lib/user';
-
-	onMount(() => {
-		const unsubscribe = onAuthStateChange(async (user: any) => {
-			if (!user) {
-				goto('/account/login'); // If user doesn't exist, redirect them to sign in
-			} else {
-				const userData = await getUserData();
-				if (!userData) goto('/account/register'); // If user exists, but they don't have any data on them, take them to register
-			}
-		});
-
-		return unsubscribe; // Clean up listener on component destroy
-	});
+	import Register from './Register.svelte';
 </script>
 
+<head>
+	<title>Register</title>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
 <div class="app bg-stone-900">
-	<Header />
+	<div />
 
 	<main>
-		<slot />
+		<section class="text-white">
+			<Register />
+		</section>
 	</main>
 
 	<footer>

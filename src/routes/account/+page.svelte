@@ -7,7 +7,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { onAuthStateChange } from '$lib/auth';
-	import { getUserData } from '$lib/user';
+	import { getUserData } from '$lib/storage/stores';
 
 	onMount(() => {
 		const unsubscribe = onAuthStateChange(async (user: any) => {
@@ -15,7 +15,6 @@
 				goto('/account/login'); // If user doesn't exist, redirect them to sign in
 			} else {
 				const userData = await getUserData();
-				console.log(userData);
 				if (!userData) goto('/account/register'); // If user exists, but they don't have any data on them, take them to register
 			}
 		});
@@ -24,6 +23,12 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Account</title>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</svelte:head>
+
 <div class="app bg-stone-900">
 	<Header />
 
@@ -31,7 +36,7 @@
 		<section>
 			<button
 				on:click={logout}
-				class="text-white bg-gradient-to-br from-indigo-600 to-indigo-800 hover:bg-gradient-to-br hover:from-indigo-700 hover:to-indigo-900 h-10 ml-1 my-1 rounded"
+				class="text-white bg-gradient-to-br from-violet-600 to-violet-800 hover:bg-gradient-to-br hover:from-violet-700 hover:to-violet-900 h-10 ml-1 my-1 rounded"
 				><p class="px-5 py-2">Log out</p></button
 			>
 		</section>

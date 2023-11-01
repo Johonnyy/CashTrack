@@ -4,13 +4,17 @@
 	import { onMount } from 'svelte';
 	import { onAuthStateChange } from '$lib/auth';
 	import { tConvert } from '$lib/functions';
-	import { getUserData } from '$lib/user';
+	import { getUserData, updateUserData } from '$lib/storage/stores';
+	import { newTransaction } from '$lib/user';
+	import { slide } from 'svelte/transition';
 
 	const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 	const today = new Date();
 
 	let shifts: any[] = [];
+
+	let loading = true;
 
 	let user: any;
 
@@ -77,6 +81,7 @@
 			});
 
 			shifts = newShifts;
+			loading = false;
 		}
 	};
 
@@ -96,8 +101,10 @@
 
 		if (user) {
 			const userData = await getUserData();
+			await newTransaction(finishingTips, userData.balance + finishingTips, 'End of shift');
+
 			if (userData) {
-				await updateDoc(doc(db, 'users', user.uid), {
+				await updateUserData({
 					balance: userData.balance + finishingTips
 				});
 			}
@@ -127,24 +134,24 @@
 >
 	<div class="flex items-center">
 		<div class="text-lg font-extrabold uppercase flex">
-			Week of {sunday.getMonth()}-{sunday.getDate()}-{sunday.getFullYear()}
+			Week of {sunday.getMonth() + 1}-{sunday.getDate()}-{sunday.getFullYear()}
 		</div>
 	</div>
 	<div class="flex flex-row">
 		<a
 			href="/tracker/newshift"
 			rel="prefetch"
-			class="text-white bg-gradient-to-br from-indigo-600 to-indigo-800 hover:bg-gradient-to-br hover:from-indigo-700 hover:to-indigo-900 h-10 ml-1 my-1 rounded"
+			class="text-white bg-gradient-to-br from-violet-600 to-violet-800 hover:bg-gradient-to-br hover:from-violet-700 hover:to-violet-900 h-10 ml-1 my-1 rounded"
 			><p class="px-5 py-2">New Shift</p></a
 		>
 		<button
 			on:click={moveBack}
-			class="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:bg-gradient-to-br hover:from-indigo-700 hover:to-indigo-800 h-10 ml-1 my-1 rounded rounded-r-none px-2"
+			class="bg-gradient-to-r from-violet-600 to-violet-700 hover:bg-gradient-to-br hover:from-violet-700 hover:to-violet-800 h-10 ml-1 my-1 rounded rounded-r-none px-2"
 			>&lt;</button
 		>
 		<button
 			on:click={moveForward}
-			class="bg-gradient-to-r from-indigo-700 to-indigo-800 hover:bg-gradient-to-br hover:from-indigo-800 hover:to-indigo-900 h-10 my-1 rounded rounded-l-none px-2"
+			class="bg-gradient-to-r from-violet-700 to-violet-800 hover:bg-gradient-to-br hover:from-violet-800 hover:to-violet-900 h-10 my-1 rounded rounded-l-none px-2"
 			>&gt;</button
 		>
 	</div>
@@ -156,38 +163,40 @@
 					: 'border-stone-600'} bg-stone-700 text-center p-4 w-5/6 drop-shadow-md"
 			>
 				<div class="text-lg font-bold">
-					{daysOfWeek[day.getDay()]} ({weekDays[index].getMonth()}-{weekDays[index].getDate()})
+					{daysOfWeek[day.getDay()]} ({weekDays[index].getMonth() + 1}-{weekDays[index].getDate()})
 				</div>
 				{#if findShifts(weekDays[index]).length > 0}
 					{#each findShifts(weekDays[index]) as shift}
 						<div
-							class="flex flex-col items-center bg-stone-800 drop-shadow-xl rounded-md py-5 mt-5"
+							transition:slide={{ axis: 'y' }}
+							class="flex flex-col items-center font-light bg-stone-800 drop-shadow-xl rounded-md py-5 mt-5"
 						>
 							<div>
 								{shift.time.name} ({tConvert(shift.time.startTime)} - {tConvert(
 									shift.time.endTime
 								)})
 							</div>
-							<br />
 							<div>
 								{shift.location}
 							</div>
-							<br />
-							<div>Estimated Earnings: No Data</div>
-							<br />
 							{#if shift.made > 0 || finishedShifts.includes(shift.id)}
 								<a
 									href="/tracker/shift/{shift.id}"
-									class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-blue-600 to-blue-800 hover:bg-gradient-to-br hover:from-blue-700 hover:to-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 drop-shadow-lg mt-3"
+									class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-blue-600 to-blue-800 hover:bg-gradient-to-br hover:from-blue-700 hover:to-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg mt-3"
 								>
 									Manage Shift
 								</a>
 							{:else if shift.id === finishingShift}
-								<form class="flex flex-col" on:submit|preventDefault={finishClosing}>
+								<br />
+								<form
+									transition:slide={{}}
+									class="flex flex-col"
+									on:submit|preventDefault={finishClosing}
+								>
 									<input
 										type="number"
 										placeholder="Enter Tips"
-										class="bg-stone-600 rounded px-3 py-1"
+										class="bg-stone-600 rounded md:px-3 py-1"
 										required
 										bind:value={finishingTips}
 									/>
@@ -200,23 +209,32 @@
 										class="bg-stone-600 rounded px-3 py-1"
 										bind:value={finishingExclude}
 									/>
-									<button
-										type="submit"
-										class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-green-600 to-green-800 hover:bg-gradient-to-br hover:from-green-700 hover:to-green-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 drop-shadow-lg mt-3"
-										>Submit</button
-									>
+									<div class="flex flex-row gap-x-2">
+										<button
+											on:click={() => {
+												finishingShift = '';
+											}}
+											class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-red-600 to-red-800 hover:bg-gradient-to-br hover:from-red-700 hover:to-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg mt-3"
+											>Cancel</button
+										>
+										<button
+											type="submit"
+											class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-green-600 to-green-800 hover:bg-gradient-to-br hover:from-green-700 hover:to-green-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg mt-3"
+											>Submit</button
+										>
+									</div>
 								</form>
 							{:else if shift.made === 0}
 								<div class="flex flex-row center gap-x-3">
 									<button
 										on:click={() => startClosingShift(shift.id)}
-										class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-green-600 to-green-800 hover:bg-gradient-to-br hover:from-green-700 hover:to-green-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 drop-shadow-lg mt-3"
+										class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-green-600 to-green-800 hover:bg-gradient-to-br hover:from-green-700 hover:to-green-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg mt-3"
 									>
 										Close Shift
 									</button>
 									<a
 										href="/tracker/shift/{shift.id}"
-										class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-blue-600 to-blue-800 hover:bg-gradient-to-br hover:from-blue-700 hover:to-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 drop-shadow-lg mt-3"
+										class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-blue-600 to-blue-800 hover:bg-gradient-to-br hover:from-blue-700 hover:to-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg mt-3"
 									>
 										Manage Shift
 									</a>
@@ -224,6 +242,10 @@
 							{/if}
 						</div>
 					{/each}
+				{:else if loading}
+					<div class="bg-gray-400 rounded-lg shadow-md px-4 py-1 w-full mt-3 animate-pulse">
+						<div class="w-full bg-gray-500 rounded mb-2" />
+					</div>
 				{:else}
 					<div class="text-gray-500">No shifts planned</div>
 				{/if}

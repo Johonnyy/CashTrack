@@ -19,6 +19,14 @@ const firebaseConfig = {
 	measurementId: import.meta.env.VITE_MEASUREMENTID
 };
 
+// console.log(import.meta.env.VITE_APIKEY);
+// console.log(import.meta.env.VITE_AUTHDOMAIN);
+// console.log(import.meta.env.VITE_PROJECTID);
+// console.log(import.meta.env.VITE_STORAGEBUCKET);
+// console.log(import.meta.env.VITE_MESSAGINGSENDERID);
+// console.log(import.meta.env.VITE_APPID);
+// console.log(import.meta.env.VITE_MEASUREMENTID);
+
 let firebaseApp;
 
 if (!getApps().length) {

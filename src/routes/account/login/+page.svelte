@@ -1,15 +1,28 @@
-<script>
+<script lang="ts">
 	import '../../styles.css';
 	import '../../../app.css';
 
 	import AuthForm from './AuthForm.svelte';
+	import { onMount } from 'svelte';
+	import { onAuthStateChange } from '$lib/auth';
+	import { goto } from '$app/navigation';
+
+	onMount(() => {
+		const unsubscribe = onAuthStateChange(async (user: any) => {
+			if (user) {
+				goto('/tracker');
+			}
+		});
+
+		return unsubscribe; // Clean up listener on component destroy
+	});
 </script>
 
-<head>
+<svelte:head>
 	<title>Login</title>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-</head>
+</svelte:head>
 
 <div class="app bg-stone-900">
 	<div />

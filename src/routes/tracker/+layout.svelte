@@ -6,7 +6,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { onAuthStateChange } from '$lib/auth';
-	import { getUserData } from '$lib/user';
+	import { getUserData } from '$lib/storage/stores';
 
 	onMount(() => {
 		const unsubscribe = onAuthStateChange(async (user: any) => {

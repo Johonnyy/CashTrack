@@ -5,7 +5,8 @@
 	import { onMount } from 'svelte';
 	import { tConvert } from '$lib/functions';
 	import { goto } from '$app/navigation';
-	import { getUserData } from '$lib/user.js';
+	import { getUserData, updateUserData } from '$lib/storage/stores';
+	import { newTransaction } from '$lib/user.js';
 
 	let currentUser: any;
 
@@ -21,7 +22,8 @@
 	const deleteShift = async function () {
 		const userData = await getUserData();
 		if (userData) {
-			await updateDoc(doc(db, 'users', currentUser.uid), {
+			await newTransaction(-shift.made, userData.balance - shift.made, 'Deleted shift');
+			await updateUserData({
 				balance: userData.balance - shift.made
 			});
 		}

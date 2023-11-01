@@ -1,4 +1,5 @@
 <script>
+	import logo from '$lib/images/logo.png';
 	import github from '$lib/images/github.svg';
 	import './styles.css';
 	import '../app.css';
@@ -12,12 +13,9 @@
 
 <div class="app bg-stone-900">
 	<header class="bg-gradient-to-b from-stone-800 to-stone-900 h-20">
-		<a
-			href="/account/login"
-			rel="prefetch"
-			class="text-white bg-gradient-to-br from-indigo-600 to-indigo-800 hover:bg-gradient-to-br hover:from-indigo-700 hover:to-indigo-900 h-10 ml-1 my-1 rounded"
-			><p class="px-5 py-2">Sign in</p></a
-		>
+		<a href="/" class="h-12 w-12 mt-2 ml-2 rounded">
+			<img src={logo} alt="Logo" class="h-full" />
+		</a>
 
 		<nav class="flex justify-center">
 			<div
@@ -37,7 +35,7 @@
 	<main>
 		<section>
 			<div
-				class="text-center drop-shadow-md text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 to-indigo-800"
+				class="text-center drop-shadow-md text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-violet-600 to-violet-800"
 			>
 				Predict Your Earnings
 			</div>
@@ -47,7 +45,7 @@
 			<a
 				href="/account/login"
 				rel="prefetch"
-				class="bg-gradient-to-br from-indigo-600 to-indigo-800 hover:bg-gradient-to-br hover:from-indigo-700 hover:to-indigo-900 rounded px-4 py-2 mt-6 text-white drop-shadow-md font-medium"
+				class="bg-gradient-to-br from-violet-600 to-violet-800 hover:bg-gradient-to-br hover:from-violet-700 hover:to-violet-900 rounded px-4 py-2 mt-6 text-white drop-shadow-md font-medium"
 			>
 				Start Now
 			</a>

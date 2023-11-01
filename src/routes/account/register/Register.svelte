@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { db, auth } from '$lib/firebase/firebase.client';
+	import { setUserData } from '$lib/storage/stores';
 	import { doc, setDoc } from 'firebase/firestore';
 
 	let errorMessage = '';
 	let firstName = '';
 	let lastName = '';
 	let workplace = '';
-	let workperweek = '';
 
 	const handleRegister = async function () {
 		if (!auth.currentUser) return;
@@ -15,7 +15,7 @@
 		const uid = auth.currentUser.uid;
 		const phoneNumber = auth.currentUser.phoneNumber;
 
-		await setDoc(doc(db, 'users', uid), {
+		await setUserData({
 			uid: uid,
 			phone: phoneNumber,
 			name: {
@@ -54,7 +54,7 @@
 						name="first-name"
 						type="text"
 						required
-						class="rounded-lg relative block w-full px-3 py-2 bg-gray-500 border border-gray-800 placeholder-gray-200 text-gray-50 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+						class="rounded-lg relative block w-full px-3 py-2 bg-gray-500 border border-gray-800 placeholder-gray-200 text-gray-50 rounded-t-md focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 sm:text-sm"
 						placeholder="First Name"
 						bind:value={firstName}
 					/>
@@ -64,7 +64,7 @@
 						name="last-name"
 						type="text"
 						required
-						class="rounded-lg relative block w-full px-3 py-2 bg-gray-500 border border-gray-800 placeholder-gray-200 text-gray-50 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+						class="rounded-lg relative block w-full px-3 py-2 bg-gray-500 border border-gray-800 placeholder-gray-200 text-gray-50 rounded-t-md focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 sm:text-sm"
 						placeholder="Last Name"
 						bind:value={lastName}
 					/>
@@ -73,7 +73,7 @@
 						id="workplace"
 						name="workplace"
 						required
-						class="rounded-lg relative block w-full px-3 py-2 bg-gray-500 border border-gray-800 text-gray-50 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+						class="rounded-lg relative block w-full px-3 py-2 bg-gray-500 border border-gray-800 text-gray-50 rounded-t-md focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 sm:text-sm"
 						bind:value={workplace}
 					>
 						<option value="" disabled selected>Select your workplace</option>
@@ -105,7 +105,7 @@
 
 					<button
 						type="submit"
-						class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-indigo-600 to-indigo-800 hover:bg-gradient-to-br hover:from-indigo-700 hover:to-indigo-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 drop-shadow-lg"
+						class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-violet-600 to-violet-800 hover:bg-gradient-to-br hover:from-violet-700 hover:to-violet-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg"
 					>
 						Register
 					</button>

@@ -51,10 +51,18 @@
 	}
 
 	const handleInput = async function (index: any, event: any) {
-		verificationCodeDigits[index] = event.target.value;
-
-		if (index < verificationCodeDigits.length - 1 && verificationCodeDigits[index] !== '') {
-			verificationCodeInputs[index + 1].focus();
+		const inputValue = event.target.value;
+		if (inputValue.length === 6 && index === 0) {
+			// Populate the 6 boxes and shift focus to the last one
+			verificationCodeDigits = inputValue.split('');
+			verificationCodeInputs[verificationCodeInputs.length - 1].focus();
+			verificationCode = inputValue;
+			await onVerifyCodeSubmit();
+		} else {
+			verificationCodeDigits[index] = inputValue.slice(-1); // Last character
+			if (index < verificationCodeDigits.length - 1 && verificationCodeDigits[index] !== '') {
+				verificationCodeInputs[index + 1].focus();
+			}
 		}
 
 		if (verificationCodeDigits.every((digit) => digit !== '')) {
@@ -71,6 +79,23 @@
 			if (index > 0) {
 				verificationCodeInputs[index - 1].focus();
 			}
+		}
+	};
+
+	let hiddenInput: any = null;
+
+	const handleAutofill = async function (event: any) {
+		const value = event.target.value;
+		if (value.length >= 6) {
+			// Assuming verificationCodeDigits is your array for individual digits
+			verificationCodeDigits = value.split('').slice(0, 6);
+
+			for (let i = 0; i < verificationCodeDigits.length; i++) {
+				let digit = verificationCodeDigits[i];
+			}
+
+			// Run your function
+			//await onVerifyCodeSubmit();
 		}
 	};
 
@@ -103,14 +128,13 @@
 			console.error(error);
 			if (error.code === 'auth/invalid-phone-number') {
 				errorMessage = 'The phone number is invalid. Please enter a valid phone number.';
-			} else if (error.code === 'auth/quota-exceeded') {
-				errorMessage = 'There has been an error sending your code. Please try again later.';
 			} else {
-				// Handle other types of errors
-				alert(error.message);
+				errorMessage = 'There has been an error sending your code. Please try again later.';
 			}
+
 			// Handle error.
 		}
+		console.log(confirmationResult);
 
 		loading = false;
 	}
@@ -229,11 +253,7 @@
 				class="absolute"
 			>
 				<svg width="32" height="32">
-					<image
-						xlink:href="https://www.svgrepo.com/show/533620/arrow-sm-left.svg"
-						width="32"
-						height="32"
-					/>
+					<image xlink:href="/left-arrow.svg" width="32" height="32" />
 				</svg>
 			</button>
 			<div in:fly={{ x: 300, duration: 300, delay: 300 }} out:fly={{ x: 300, duration: 300 }}>
@@ -258,15 +278,21 @@
 					<input type="hidden" name="remember" value="true" />
 					<div class="rounded-md -space-y-px">
 						<div class="flex flex-row gap-x-3 justify-center">
+							<input
+								type="text"
+								autocomplete="one-time-code"
+								style="opacity: 0; position: absolute;"
+								bind:this={hiddenInput}
+								on:input={handleAutofill}
+							/>
 							{#each verificationCodeDigits as digit, index}
 								<input
 									bind:this={verificationCodeInputs[index]}
 									type="text"
-									maxlength="1"
-									inputmode="numeric"
+									pattern="[0-9]*"
 									value={digit}
 									disabled={loading}
-									class="w-12 h-12 bg-transparent border-b-2 border-b-white outline-none text-center focus:border-b-4"
+									class="w-8 h-8 md:w-12 md:h-12 rounded-none bg-transparent border-b-2 border-b-white outline-none text-center focus:border-b-4"
 									on:input={(event) => handleInput(index, event)}
 									on:keydown={(event) => handleKeyDown(index, event)}
 								/>

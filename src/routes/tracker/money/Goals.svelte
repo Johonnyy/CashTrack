@@ -20,6 +20,9 @@
 			name: newGoalName,
 			uid: user.uid
 		});
+
+		newGoalName = '';
+		newGoalAmount = '';
 	};
 
 	const deleteGoal = async function (id: string) {
@@ -76,7 +79,10 @@
 						<div
 							class="bg-gradient-to-br from-violet-600 to-violet-800 text-sm font-medium text-blue-100 text-center p-3 leading-none rounded-l-full"
 							style="width: {((user.balance >= goal.goal ? goal.goal : user.balance) / goal.goal) *
-								100}%"
+								100 <
+							0
+								? 0
+								: ((user.balance >= goal.goal ? goal.goal : user.balance) / goal.goal) * 100}%"
 							transition:slide={{ axis: 'x' }}
 						>
 							{Math.round((user.balance / goal.goal) * 100)}%

@@ -120,6 +120,17 @@
 <div
 	class="flex flex-col items-center justify-center bg-stone-800 drop-shadow-xl rounded-3xl py-12 px-4 sm:px-6 lg:px-8 w-4/5 gap-y-5"
 >
+	<div class="absolute top-8 left-8">
+		<button
+			on:click={() => {
+				goto('/tracker');
+			}}
+		>
+			<svg width="32" height="32" fill="white">
+				<image xlink:href="/left-arrow.svg" width="32" height="32" />
+			</svg>
+		</button>
+	</div>
 	<div class="flex items-center">
 		<div class="text-xl font-extrabold uppercase flex">Create New Shift</div>
 	</div>

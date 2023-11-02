@@ -130,7 +130,7 @@
 </script>
 
 <div
-	class="flex flex-col items-center justify-center bg-stone-800 drop-shadow-xl rounded-3xl py-12 px-4 sm:px-6 lg:px-8 w-4/5 gap-y-5"
+	class="flex flex-col items-center justify-center bg-stone-800 drop-shadow-xl rounded-3xl py-12 px-4 sm:px-6 lg:px-8 w-11/12 md:w-4/5 gap-y-5"
 >
 	<div class="flex items-center">
 		<div class="text-lg font-extrabold uppercase flex">
@@ -160,7 +160,7 @@
 			<div
 				class="rounded border {day.toDateString() == today.toDateString()
 					? 'border-stone-300 border-2'
-					: 'border-stone-600'} bg-stone-700 text-center p-4 w-5/6 drop-shadow-md"
+					: 'border-stone-600'} bg-stone-700 text-center p-4 w-11/12 md:w-5/6 drop-shadow-md"
 			>
 				<div class="text-lg font-bold">
 					{daysOfWeek[day.getDay()]} ({weekDays[index].getMonth() + 1}-{weekDays[index].getDate()})
@@ -228,13 +228,13 @@
 								<div class="flex flex-row center gap-x-3">
 									<button
 										on:click={() => startClosingShift(shift.id)}
-										class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-green-600 to-green-800 hover:bg-gradient-to-br hover:from-green-700 hover:to-green-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg mt-3"
+										class="group relative w-full flex justify-center py-2 px-4 text-xs md:text-sm font-medium rounded-md text-white bg-gradient-to-br from-green-600 to-green-800 hover:bg-gradient-to-br hover:from-green-700 hover:to-green-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg mt-3"
 									>
 										Close Shift
 									</button>
 									<a
 										href="/tracker/shift/{shift.id}"
-										class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-blue-600 to-blue-800 hover:bg-gradient-to-br hover:from-blue-700 hover:to-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg mt-3"
+										class="group relative w-full flex justify-center py-2 px-4 text-xs md:text-sm font-medium rounded-md text-white bg-gradient-to-br from-blue-600 to-blue-800 hover:bg-gradient-to-br hover:from-blue-700 hover:to-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg mt-3"
 									>
 										Manage Shift
 									</a>

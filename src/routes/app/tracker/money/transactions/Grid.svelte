@@ -70,7 +70,7 @@
 	<div class="flex flex-row justify-between w-full">
 		<button
 			on:click={() => {
-				goto('/tracker/money');
+				goto('/app/tracker/money');
 			}}
 		>
 			<svg width="32" height="32">

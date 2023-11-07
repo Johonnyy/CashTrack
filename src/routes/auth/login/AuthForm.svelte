@@ -146,7 +146,7 @@
 			if (confirmationResult) {
 				const result = await confirmationResult.confirm(verificationCode);
 
-				goto('/tracker');
+				goto('/app/tracker');
 			}
 		} catch (error: any) {
 			console.error(error);

@@ -43,7 +43,7 @@
 				Track your goals and earnings. Tailored for a tipping workplace.
 			</div>
 			<a
-				href="/account/login"
+				href="/auth/login"
 				rel="prefetch"
 				class="bg-gradient-to-br from-violet-600 to-violet-800 hover:bg-gradient-to-br hover:from-violet-700 hover:to-violet-900 rounded px-4 py-2 mt-6 text-white drop-shadow-md font-medium"
 			>

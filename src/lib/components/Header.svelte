@@ -6,42 +6,69 @@
 
 	import { slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { onAuthStateChange } from '$lib/auth';
+	import { getUserData, userData, showMenu } from '$lib/storage/stores';
+	import { logout } from '$lib/auth';
 
-	let showMenu = false;
+	let user: any;
+
+	let showMobileMenu = false;
+	let showAccountMenu = false;
 
 	const navigate = async (url: string) => {
 		await goto(url);
-		showMenu = false;
+		showMenu.set(false);
+		showAccountMenu = false;
 	};
+
+	onMount(() => {
+		const unsubscribe = onAuthStateChange(async (newUser: any) => {
+			if (newUser) {
+				user = await getUserData();
+			}
+
+			userData.subscribe((value) => {
+				user = value;
+			});
+
+			showMenu.subscribe((value) => {
+				showMobileMenu = value;
+			});
+		});
+
+		return unsubscribe; // Clean up listener on component destroy
+	});
 </script>
 
 <div class="app bg-stone-900">
 	<header class="bg-gradient-to-b from-stone-800 to-stone-900 h-20">
-		<a
-			href="/account"
+		<button
+			on:click={() => (showAccountMenu = !showAccountMenu)}
 			class="hidden md:flex text-white h-full items-center font-bold text-base no-underline ml-4"
-			>Account</a
-		>
+			>Welcome {user?.name?.first || ''}
+			<div class="arrow" class:rotate={showAccountMenu} />
+		</button>
 
 		<nav class="hidden md:flex justify-center">
 			<ul class="text-white relative flex justify-center items-center">
-				<li aria-current={$page.url.pathname === '/tracker' ? 'page' : undefined}>
+				<li aria-current={$page.url.pathname === '/app/tracker' ? 'page' : undefined}>
 					<a
-						href="/tracker"
+						href="/app/tracker"
 						class="flex h-full items-center font-bold text-base uppercase no-underline mr-4"
 						>Calendar</a
 					>
 				</li>
-				<li aria-current={$page.url.pathname === '/tracker/estimate' ? 'page' : undefined}>
+				<li aria-current={$page.url.pathname === '/app/tracker/estimate' ? 'page' : undefined}>
 					<a
-						href="/tracker/estimate"
+						href="/app/tracker/estimate"
 						class="flex h-full items-center font-bold text-base uppercase no-underline mx-4"
 						>Estimate</a
 					>
 				</li>
-				<li aria-current={$page.url.pathname === '/tracker/money' ? 'page' : undefined}>
+				<li aria-current={$page.url.pathname === '/app/tracker/money' ? 'page' : undefined}>
 					<a
-						href="/tracker/money"
+						href="/app/tracker/money"
 						class="flex h-full items-center font-bold text-base uppercase no-underline ml-4"
 						>Money</a
 					>
@@ -50,8 +77,8 @@
 		</nav>
 
 		<button
-			on:click={() => (showMenu = !showMenu)}
-			class="md:hidden flex focus:outline-none items-center justify-center ml-8"
+			on:click={() => showMenu.set(!showMobileMenu)}
+			class="md:hidden flex focus:outline-none items-center justify-center ml-8 p-4 pl-0"
 		>
 			<div class="flex flex-col space-y-1">
 				<div class="w-6 h-0.5 bg-white" />
@@ -60,54 +87,57 @@
 			</div>
 		</button>
 
-		{#if showMenu}
-			<!-- Mobile dropdown menu -->
-			<nav id="mobileMenu" class="fixed inset-0 z-50 bg-stone-900" transition:slide={{ axis: 'y' }}>
-				<div class="flex flex-row justify-between">
-					<button
-						on:click={() => (showMenu = !showMenu)}
-						class="font-bold text-4xl font-mono no-underline ml-5 mt-3 p-3 text-white">x</button
-					>
-					<button
-						on:click={() => navigate('/account')}
-						class="font-bold text-2xl text-white mr-5 mt-3 p-3">Account</button
-					>
-				</div>
-
-				<div class="text-white flex flex-col items-center space-y-2 mt-10 w-full">
-					<div class="py-6 border-b-2 w-4/5">
-						<button
-							on:click={() => navigate('/tracker')}
-							class="font-bold text-base uppercase w-full">Calendar</button
-						>
-					</div>
-					<div class="py-6 border-b-2 w-4/5">
-						<button
-							on:click={() => navigate('/tracker/estimate')}
-							class="font-bold text-base uppercase no-underline w-full">Estimate</button
-						>
-					</div>
-					<div class="py-6 w-4/5">
-						<button
-							on:click={() => navigate('/tracker/money')}
-							class="font-bold text-base uppercase no-underline w-full">Money</button
-						>
-					</div>
-				</div>
-			</nav>
-		{/if}
-
-		<div class="w-8 mr-8">
-			<a href="https://github.com/Johonnyy/Money-Tracker">
-				<img src={github} alt="GitHub" class="h-full" />
+		<div class="h-8 mr-8 text-right">
+			<a class="w-full h-full" href="https://github.com/Johonnyy/Money-Tracker">
+				<img src={github} alt="GitHub" class="h-full w-full" />
 			</a>
 		</div>
 	</header>
+	{#if showAccountMenu}
+		<div
+			class="absolute z-40 px-12 top-20 left-8 rounded-xl drop-shadow-lg bg-stone-800 text-white font-medium text-lg flex flex-col"
+			transition:slide={{ axis: 'y' }}
+		>
+			<button on:click={() => navigate('/app/settings')} class="py-6">Settings</button>
+			<hr />
+			<button on:click={async () => logout()} class="py-6">Logout</button>
+		</div>
+	{/if}
 </div>
 
 <style>
 	header {
+		position: relative;
+
 		display: flex;
 		justify-content: space-between;
+		align-items: center;
+	}
+
+	nav {
+		position: absolute;
+		left: 50%;
+		transform: translateX(-50%);
+	}
+
+	nav ul {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 0;
+	}
+
+	.arrow {
+		border: solid white;
+		border-width: 0 2px 2px 0;
+		display: inline-block;
+		padding: 3px;
+		margin-left: 10px;
+		transform: rotate(45deg);
+		transition: transform 0.3s ease-in-out;
+		transform-origin: 50% 50%;
+	}
+	.rotate {
+		transform: rotate(225deg);
 	}
 </style>

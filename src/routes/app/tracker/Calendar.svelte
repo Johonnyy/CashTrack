@@ -139,7 +139,7 @@
 	</div>
 	<div class="flex flex-row">
 		<a
-			href="/tracker/newshift"
+			href="/app/tracker/newshift"
 			rel="prefetch"
 			class="text-white bg-gradient-to-br from-violet-600 to-violet-800 hover:bg-gradient-to-br hover:from-violet-700 hover:to-violet-900 h-10 ml-1 my-1 rounded"
 			><p class="px-5 py-2">New Shift</p></a
@@ -181,7 +181,7 @@
 							</div>
 							{#if shift.made > 0 || finishedShifts.includes(shift.id)}
 								<a
-									href="/tracker/shift/{shift.id}"
+									href="/app/tracker/shift/{shift.id}"
 									class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-blue-600 to-blue-800 hover:bg-gradient-to-br hover:from-blue-700 hover:to-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg mt-3"
 								>
 									Manage Shift
@@ -233,7 +233,7 @@
 										Close Shift
 									</button>
 									<a
-										href="/tracker/shift/{shift.id}"
+										href="/app/tracker/shift/{shift.id}"
 										class="group relative w-full flex justify-center py-2 px-4 text-xs md:text-sm font-medium rounded-md text-white bg-gradient-to-br from-blue-600 to-blue-800 hover:bg-gradient-to-br hover:from-blue-700 hover:to-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg mt-3"
 									>
 										Manage Shift

@@ -43,12 +43,7 @@
 
 	const setupRealtimeUpdates = () => {
 		const queryCollection = collection(db, 'transactions');
-		const q = query(
-			queryCollection,
-			where('uid', '==', user.uid),
-			orderBy('time', 'desc'),
-			limit(3)
-		);
+		const q = query(queryCollection, where('uid', '==', user.uid), orderBy('time', 'desc'));
 
 		return onSnapshot(q, (snapshot) => {
 			let newTransactions: any = [];
@@ -109,7 +104,7 @@
 			{/each}
 		</div>
 		<a
-			href="/tracker/money/transactions"
+			href="/app/tracker/money/transactions"
 			class="group relative flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-violet-600 to-violet-800 hover:bg-gradient-to-br hover:from-violet-700 hover:to-violet-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg mt-3"
 		>
 			View All

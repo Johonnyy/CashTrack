@@ -2,6 +2,7 @@ import { writable } from 'svelte/store';
 import { auth, db } from '$lib/firebase/firebase.client';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
+export const showMenu = writable<boolean>(false);
 export const userData = writable<null | any>(null);
 let fetchingUserDataPromise: Promise<any> | null = null;
 

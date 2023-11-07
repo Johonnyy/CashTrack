@@ -50,7 +50,7 @@
 
 		await loadShiftTimes();
 
-		shiftTime = '';
+		shiftTime = docRef.id;
 	};
 
 	const loadLocations = async function () {
@@ -79,13 +79,19 @@
 
 		await loadLocations();
 
-		location = '';
+		location = docRef.id;
+	};
+
+	const adjustDateToLocalTimezone = function (d: any) {
+		const newDate = new Date(d);
+		newDate.setMinutes(newDate.getMinutes() + newDate.getTimezoneOffset());
+		return newDate;
 	};
 
 	const createNewShift = async function () {
 		if (!auth.currentUser) return;
 
-		const dateToUse = Timestamp.fromDate(new Date(date));
+		const dateToUse = Timestamp.fromDate(adjustDateToLocalTimezone(date));
 		const timeObject = shiftTimesArray[shiftTimesArray.findIndex((i) => i.id == shiftTime)];
 		const locationObject = locationsArray[locationsArray.findIndex((i) => i.id == location)];
 
@@ -95,14 +101,16 @@
 			time: {
 				startTime: timeObject.startTime,
 				endTime: timeObject.endTime,
-				name: timeObject.name
+				name: timeObject.name,
+				id: shiftTime
 			},
 			location: locationObject.name,
+			locationId: location,
 			estimated: 0,
 			made: 0
 		});
 
-		goto('/tracker');
+		goto('/app/tracker');
 	};
 
 	onMount(() => {
@@ -120,10 +128,10 @@
 <div
 	class="flex flex-col items-center justify-center bg-stone-800 drop-shadow-xl rounded-3xl py-12 px-4 sm:px-6 lg:px-8 w-4/5 gap-y-5"
 >
-	<div class="absolute top-8 left-8">
+	<div class="absolute top-4 left-4 md:top-8 md:left-8">
 		<button
 			on:click={() => {
-				goto('/tracker');
+				goto('/app/tracker');
 			}}
 		>
 			<svg width="32" height="32" fill="white">
@@ -245,7 +253,7 @@
 			<div class="text-xl font-extrabold uppercase flex">Or Import From Sling</div>
 
 			<a
-				href="/tracker/sling"
+				href="/app/tracker/sling"
 				rel="prefetch"
 				style="background-color: #0085ff"
 				class="rounded px-4 py-2 mt-6 text-white drop-shadow-md font-medium"

@@ -15,7 +15,7 @@ export async function logout() {
 	try {
 		await setUserData(null);
 		await signOut(auth);
-		goto('/account/login');
+		goto('/auth/login');
 	} catch (error) {
 		console.error('Error signing out:', error);
 	}

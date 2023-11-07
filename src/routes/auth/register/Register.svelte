@@ -26,7 +26,7 @@
 			balance: 0
 		});
 
-		goto('/tracker');
+		goto('/app/tracker');
 	};
 </script>
 

@@ -1,9 +1,10 @@
 /* eslint-disable no-unused-vars */
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApp, getApps, deleteApp } from 'firebase/app';
-import { getAuth, RecaptchaVerifier, setPersistence, inMemoryPersistence } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
+import { getAnalytics } from 'firebase/analytics';
+import { browser } from '$app/environment';
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -40,3 +41,7 @@ if (!getApps().length) {
 
 export const auth = getAuth(firebaseApp);
 export const db = getFirestore(firebaseApp);
+
+if (browser) {
+	const analytics = getAnalytics(firebaseApp);
+}

@@ -5,6 +5,11 @@
 	import { onAuthStateChange } from '$lib/auth';
 	import { goto } from '$app/navigation';
 	import { tConvert } from '$lib/functions';
+	import { slide } from 'svelte/transition';
+
+	const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+	let user: any;
 
 	let shiftTimes: any[] = [];
 	let shiftTimesArray: any[] = [];
@@ -88,34 +93,64 @@
 		return newDate;
 	};
 
+	const getEstimate = async (dateToFilter: Date, shiftTime: string, location: string) => {
+		let total: number = 0;
+		let divideBy: number = 0;
+
+		let q = query(
+			collection(db, 'shifts'),
+			where('uid', '==', user.uid),
+			where('timeId', '==', shiftTime),
+			where('locationId', '==', location)
+		);
+
+		const querySnapshot = await getDocs(q);
+		querySnapshot.forEach((doc) => {
+			const data = doc.data();
+
+			const date = data.date.toDate();
+			const day = date.getDay();
+
+			if (data.exclude) return;
+			if (data.made === null) return;
+
+			if (dateToFilter.getDay() === day) {
+				total += data.made;
+				divideBy += 1;
+			}
+		});
+
+		if (divideBy === 0) {
+			return null;
+		}
+
+		return Math.round(total / divideBy);
+	};
+
 	const createNewShift = async function () {
 		if (!auth.currentUser) return;
 
-		const dateToUse = Timestamp.fromDate(adjustDateToLocalTimezone(date));
-		const timeObject = shiftTimesArray[shiftTimesArray.findIndex((i) => i.id == shiftTime)];
-		const locationObject = locationsArray[locationsArray.findIndex((i) => i.id == location)];
+		const adjustedDate = adjustDateToLocalTimezone(date);
+		const dateToUse = Timestamp.fromDate(adjustedDate);
+
+		let estimate = await getEstimate(adjustedDate, shiftTime, location);
 
 		const docRef = await addDoc(collection(db, 'shifts'), {
 			uid: auth.currentUser.uid,
 			date: dateToUse,
-			time: {
-				startTime: timeObject.startTime,
-				endTime: timeObject.endTime,
-				name: timeObject.name,
-				id: shiftTime
-			},
-			location: locationObject.name,
+			timeId: shiftTime,
 			locationId: location,
-			estimated: 0,
-			made: 0
+			estimated: estimate,
+			made: null
 		});
 
 		goto('/app/tracker');
 	};
 
 	onMount(() => {
-		const unsubscribe = onAuthStateChange(async (user: any) => {
-			if (user) {
+		const unsubscribe = onAuthStateChange(async (newUser: any) => {
+			if (newUser) {
+				user = newUser;
 				await loadShiftTimes();
 				await loadLocations();
 			}
@@ -169,7 +204,11 @@
 			<option value="create">Create new shift time</option>
 		</select>
 		{#if shiftTime == 'create'}
-			<form class="flex flex-col" on:submit|preventDefault={createNewShiftTime}>
+			<form
+				class="flex flex-col bg-stone-500 p-3 rounded"
+				transition:slide
+				on:submit|preventDefault={createNewShiftTime}
+			>
 				<label for="startTime">Start Time</label>
 				<input
 					type="time"
@@ -188,7 +227,7 @@
 					bind:value={createEndTime}
 					class="bg-stone-600 px-3 py-1 rounded"
 				/>
-				<label for="createShiftTimeName">Name</label>
+				<label for="createShiftTimeName">Shift Time Name</label>
 				<input
 					type="text"
 					id="createShiftTimeName"
@@ -196,6 +235,7 @@
 					required
 					bind:value={createShiftTimeName}
 					class="bg-stone-600 px-3 py-1 rounded"
+					placeholder="Opening, closing, etc."
 				/>
 				<button
 					type="submit"
@@ -221,7 +261,11 @@
 				<option value="create">Create new location</option>
 			</select>
 			{#if location == 'create'}
-				<form class="flex flex-col" on:submit|preventDefault={createNewLocation}>
+				<form
+					class="flex flex-col bg-stone-500 p-3 rounded"
+					transition:slide
+					on:submit|preventDefault={createNewLocation}
+				>
 					<label for="locationName">Location Name</label>
 					<input
 						type="text"
@@ -230,6 +274,7 @@
 						required
 						bind:value={createLocationName}
 						class="bg-stone-600 px-3 py-1 rounded"
+						placeholder="Upstairs, Section 1, etc."
 					/>
 					<button
 						type="submit"

@@ -17,6 +17,7 @@
 	import { goto } from '$app/navigation';
 	import { getUserData, updateUserData } from '$lib/storage/stores';
 	import { newTransaction } from '$lib/user.js';
+	import { slide } from 'svelte/transition';
 
 	let currentUser: any;
 
@@ -35,6 +36,7 @@
 	let date: any;
 	let shiftTime: string;
 	let location: string;
+	let exclude: any;
 
 	let createStartTime: string;
 	let createEndTime: string;
@@ -105,6 +107,16 @@
 		location = docRef.id;
 	};
 
+	const getShiftTimeById = function (id: string) {
+		const filtered = shiftTimesArray.filter((obj) => obj.id == id);
+		return filtered[0];
+	};
+
+	const getLocationById = function (id: string) {
+		const filtered = locationsArray.filter((obj) => obj.id == id);
+		return filtered[0];
+	};
+
 	const adjustDateToLocalTimezone = function (d: any) {
 		const newDate = new Date(d);
 		newDate.setMinutes(newDate.getMinutes() + newDate.getTimezoneOffset());
@@ -127,22 +139,13 @@
 		if (!auth.currentUser) return;
 
 		const dateToUse = Timestamp.fromDate(adjustDateToLocalTimezone(date));
-		const timeObject = shiftTimesArray[shiftTimesArray.findIndex((i) => i.id == shiftTime)];
-		const locationObject = locationsArray[locationsArray.findIndex((i) => i.id == location)];
-
-		console.log(data.shiftId);
 
 		const docRef = await updateDoc(doc(db, 'shifts', data.shiftId), {
 			date: dateToUse,
-			time: {
-				startTime: timeObject.startTime,
-				endTime: timeObject.endTime,
-				name: timeObject.name,
-				id: shiftTime
-			},
-			location: locationObject.name,
+			timeId: shiftTime,
 			locationId: location,
-			made: made
+			made: made,
+			exclude: exclude
 		});
 
 		let changeToBalance = made - oldMade;
@@ -179,24 +182,24 @@
 	onMount(() => {
 		const unsubscribe = onAuthStateChange(async (user: any) => {
 			if (user) {
+				await loadShiftTimes();
+				await loadLocations();
 				const userQueries = query(collection(db, 'shifts'), where('uid', '==', user.uid));
 				const querySnapshot = await getDocs(userQueries);
 				querySnapshot.forEach((doc) => {
 					if (doc.id === data.shiftId) {
 						shift = doc.data();
 						location = shift.locationId;
-						shiftTime = shift.time.id;
+						shiftTime = shift.timeId;
 						made = shift.made;
 						oldMade = shift.made;
+						exclude = shift.exclude;
 						date = formatDate(shift.date.toDate());
 					}
 					//console.log(doc.id, ' => ', doc.data());
 				});
 
 				currentUser = user;
-
-				await loadShiftTimes();
-				await loadLocations();
 			}
 		});
 
@@ -231,12 +234,14 @@
 		{#if shift}
 			{#if !editing}
 				<div class="text-lg">
-					{shift.time.name} ({tConvert(shift.time.startTime)} - {tConvert(shift.time.endTime)})
+					{getShiftTimeById(shift.timeId).name} ({tConvert(
+						getShiftTimeById(shift.timeId).startTime
+					)} - {tConvert(getShiftTimeById(shift.timeId).endTime)})
 				</div>
 				<div class="text-lg">
-					{shift.location}
+					{getLocationById(shift.locationId).name}
 				</div>
-				{#if shift.made > 0}
+				{#if shift.made !== null}
 					<div class="font-medium">
 						You made <span class="text-green-500 inline">${shift.made}</span>
 					</div>
@@ -291,7 +296,11 @@
 						<option value="create">Create new shift time</option>
 					</select>
 					{#if shiftTime == 'create'}
-						<form class="flex flex-col" on:submit|preventDefault={createNewShiftTime}>
+						<form
+							class="flex flex-col bg-stone-500 p-3 rounded"
+							transition:slide
+							on:submit|preventDefault={createNewShiftTime}
+						>
 							<label for="startTime">Start Time</label>
 							<input
 								type="time"
@@ -310,7 +319,7 @@
 								bind:value={createEndTime}
 								class="bg-stone-600 px-3 py-1 rounded"
 							/>
-							<label for="createShiftTimeName">Name</label>
+							<label for="createShiftTimeName">Shift Time Name</label>
 							<input
 								type="text"
 								id="createShiftTimeName"
@@ -318,6 +327,7 @@
 								required
 								bind:value={createShiftTimeName}
 								class="bg-stone-600 px-3 py-1 rounded"
+								placeholder="Opening, closing, etc."
 							/>
 							<button
 								type="submit"
@@ -343,7 +353,11 @@
 							<option value="create">Create new location</option>
 						</select>
 						{#if location == 'create'}
-							<form class="flex flex-col" on:submit|preventDefault={createNewLocation}>
+							<form
+								class="flex flex-col bg-stone-500 p-3 rounded"
+								transition:slide
+								on:submit|preventDefault={createNewLocation}
+							>
 								<label for="locationName">Location Name</label>
 								<input
 									type="text"
@@ -352,6 +366,7 @@
 									required
 									bind:value={createLocationName}
 									class="bg-stone-600 px-3 py-1 rounded"
+									placeholder="Upstairs, Section 1, etc."
 								/>
 								<button
 									type="submit"
@@ -361,20 +376,34 @@
 								</button>
 							</form>
 						{:else}
-							<label for="moneyMade">Money Made</label>
-							<input
-								type="number"
-								id="moneyMade"
-								name="moneyMade"
-								required
-								bind:value={made}
-								class="bg-stone-600 px-3 py-1 rounded"
-							/>
+							{#if shift.made !== null}
+								<label for="made">Made</label>
+								<input
+									type="number"
+									id="made"
+									name="made"
+									required
+									bind:value={made}
+									class="bg-stone-600 px-3 py-1 rounded"
+								/>
+							{/if}
+							<div class="flex flex-row gap-x-3 items-center justify-center">
+								<label for="exclude">Exclude from training?</label>
+								<input
+									type="checkbox"
+									id="exclude"
+									name="exclude"
+									placeholder="Exclude from training?"
+									class="bg-stone-600 rounded px-3 py-1"
+									bind:checked={exclude}
+								/>
+							</div>
+
 							<button
 								type="submit"
-								class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-green-600 to-green-800 hover:bg-gradient-to-br hover:from-green-700 hover:to-green-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg mt-3"
+								class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-violet-600 to-violet-800 hover:bg-gradient-to-br hover:from-violet-700 hover:to-violet-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg mt-3"
 							>
-								Save
+								Save Shift
 							</button>
 						{/if}
 					{/if}
@@ -399,7 +428,8 @@
 							>Are You Sure?</button
 						>
 					{/if}
-				</div>{/if}
+				</div>
+			{/if}
 		{/if}
 	</div>
 </section>

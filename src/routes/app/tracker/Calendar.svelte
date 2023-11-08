@@ -14,6 +14,12 @@
 
 	let shifts: any[] = [];
 
+	let shiftTimes: any[] = [];
+	let shiftTimesArray: any[] = [];
+
+	let locations: any[] = [];
+	let locationsArray: any[] = [];
+
 	let loading = true;
 
 	let user: any;
@@ -63,6 +69,48 @@
 
 	const findShifts = function (date: any) {
 		return shifts.filter((shift) => shift.date.toDateString() === date.toDateString());
+	};
+
+	const getShiftTimeById = function (id: string) {
+		const filtered = shiftTimesArray.filter((obj) => obj.id == id);
+		return filtered[0];
+	};
+
+	const getLocationById = function (id: string) {
+		const filtered = locationsArray.filter((obj) => obj.id == id);
+		return filtered[0];
+	};
+
+	const loadShiftTimes = async function () {
+		if (!auth.currentUser) return;
+
+		shiftTimes = [];
+
+		const q = query(collection(db, 'shiftTimes'), where('uid', '==', auth.currentUser.uid));
+		const snapshot = await getDocs(q);
+		snapshot.forEach((doc) => {
+			let data = doc.data();
+			data.id = doc.id;
+			shiftTimes.push(data);
+		});
+
+		shiftTimesArray = shiftTimes;
+	};
+
+	const loadLocations = async function () {
+		if (!auth.currentUser) return;
+
+		locations = [];
+
+		const q = query(collection(db, 'locations'), where('uid', '==', auth.currentUser.uid));
+		const snapshot = await getDocs(q);
+		snapshot.forEach((doc) => {
+			let data = doc.data();
+			data.id = doc.id;
+			locations.push(data);
+		});
+
+		locationsArray = locations;
 	};
 
 	const reloadShifts = async function () {
@@ -120,6 +168,9 @@
 		const unsubscribe = onAuthStateChange(async (newUser: any) => {
 			if (newUser) {
 				user = newUser;
+				await loadShiftTimes();
+				await loadLocations();
+
 				await reloadShifts();
 				refreshDateToUse();
 			}
@@ -172,14 +223,22 @@
 							class="flex flex-col items-center font-light bg-stone-800 drop-shadow-xl rounded-md py-5 mt-5"
 						>
 							<div>
-								{shift.time.name} ({tConvert(shift.time.startTime)} - {tConvert(
-									shift.time.endTime
-								)})
+								{getShiftTimeById(shift.timeId).name} ({tConvert(
+									getShiftTimeById(shift.timeId).startTime
+								)} - {tConvert(getShiftTimeById(shift.timeId).endTime)})
 							</div>
 							<div>
-								{shift.location}
+								{getLocationById(shift.locationId).name}
 							</div>
-							{#if shift.made > 0 || finishedShifts.includes(shift.id)}
+							{#if shift.estimated}
+								<div>
+									Estimated:
+									<span class="text-green-500 inline">
+										${shift.estimated}
+									</span>
+								</div>
+							{/if}
+							{#if shift.made !== null || finishedShifts.includes(shift.id)}
 								<a
 									href="/app/tracker/shift/{shift.id}"
 									class="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-blue-600 to-blue-800 hover:bg-gradient-to-br hover:from-blue-700 hover:to-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg mt-3"
@@ -207,7 +266,7 @@
 										name="exclude"
 										placeholder="Exclude from training?"
 										class="bg-stone-600 rounded px-3 py-1"
-										bind:value={finishingExclude}
+										bind:checked={finishingExclude}
 									/>
 									<div class="flex flex-row gap-x-2">
 										<button
@@ -224,7 +283,7 @@
 										>
 									</div>
 								</form>
-							{:else if shift.made === 0}
+							{:else if shift.made === null}
 								<div class="flex flex-row center gap-x-3">
 									<button
 										on:click={() => startClosingShift(shift.id)}

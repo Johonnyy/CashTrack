@@ -43,7 +43,12 @@
 
 	const setupRealtimeUpdates = () => {
 		const queryCollection = collection(db, 'transactions');
-		const q = query(queryCollection, where('uid', '==', user.uid), orderBy('time', 'desc'));
+		const q = query(
+			queryCollection,
+			where('uid', '==', user.uid),
+			orderBy('time', 'desc'),
+			limit(3)
+		);
 
 		return onSnapshot(q, (snapshot) => {
 			let newTransactions: any = [];

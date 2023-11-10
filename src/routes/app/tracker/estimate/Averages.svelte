@@ -32,7 +32,7 @@
 					averages[data.date.getDay()] = (averages[data.date.getDay()] || 0) + data.made;
 					dayCount[data.date.getDay()] = dayCount[data.date.getDay()] + 1;
 
-					if (data.made != 0) {
+					if (data.made != null) {
 						totalAmountMade = totalAmountMade + data.made;
 						totalShifts = totalShifts + 1;
 					}
@@ -42,6 +42,8 @@
 			});
 
 			shifts = newShifts;
+
+			averagePerShift = totalAmountMade / totalShifts;
 		}
 	};
 
@@ -52,8 +54,6 @@
 				averages[index] = Math.round(averages[index] / divideBy);
 			}
 		}
-
-		averagePerShift = totalAmountMade / totalShifts;
 	};
 
 	// MOBILE
@@ -80,7 +80,7 @@
 				user = newUser;
 
 				await reloadShifts();
-				await calculateAverages();
+				//await calculateAverages();
 			}
 		});
 
@@ -150,7 +150,7 @@
 		<div class="flex flex-row gap-x-5 text-lg font-light">
 			<div>Per Shift</div>
 			<div>-</div>
-			<div>${averagePerShift}</div>
+			<div>${Math.round(averagePerShift)}</div>
 		</div>
 	{/if}
 </div>

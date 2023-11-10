@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getUserData, updateUserData } from '$lib/storage/stores';
-	import { onAuthStateChange } from '$lib/auth';
+	import { logout, onAuthStateChange } from '$lib/auth';
 
 	let user: any = null;
 	let firstName: string = '';
@@ -85,5 +85,11 @@
 				Save Options
 			</button>
 		</div>
+		<button
+			on:click={logout}
+			class="group relative flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-gradient-to-br from-red-600 to-red-800 hover:bg-gradient-to-br hover:from-red-700 hover:to-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 drop-shadow-lg mt-3"
+		>
+			Logout
+		</button>
 	{/if}
 </div>

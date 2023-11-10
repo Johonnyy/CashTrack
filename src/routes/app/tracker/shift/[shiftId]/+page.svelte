@@ -140,13 +140,15 @@
 
 		const dateToUse = Timestamp.fromDate(adjustDateToLocalTimezone(date));
 
-		const docRef = await updateDoc(doc(db, 'shifts', data.shiftId), {
+		const updateObject = {
 			date: dateToUse,
 			timeId: shiftTime,
 			locationId: location,
 			made: made,
-			exclude: exclude
-		});
+			exclude: exclude === undefined ? false : exclude
+		};
+
+		const docRef = await updateDoc(doc(db, 'shifts', data.shiftId), updateObject);
 
 		let changeToBalance = made - oldMade;
 		let userData = await getUserData();

@@ -18,9 +18,9 @@
 	let locations: any[] = [];
 	let locationsArray: any[] = [];
 
-	let dayOfWeek: string = 'SELECT';
-	let shiftTime: string = 'SELECT';
-	let location: string = 'SELECT';
+	let dayOfWeek: string = 'NONE';
+	let shiftTime: string = 'NONE';
+	let location: string = 'NONE';
 
 	const loadShiftTimes = async function () {
 		if (!auth.currentUser) return;
@@ -62,11 +62,11 @@
 
 		let q = query(collection(db, 'shifts'), where('uid', '==', user.uid));
 
-		if (shiftTime !== 'SELECT' && shiftTime !== 'NONE') {
+		if (shiftTime !== 'NONE') {
 			q = query(q, where('timeId', '==', shiftTime));
 		}
 
-		if (location !== 'SELECT' && location !== 'NONE') {
+		if (location !== 'NONE') {
 			q = query(q, where('locationId', '==', location));
 		}
 
@@ -80,7 +80,7 @@
 			if (data.exclude) return;
 			if (data.made === null) return;
 
-			if (dayOfWeek === ('SELECT' || 'NONE')) {
+			if (dayOfWeek === 'NONE') {
 				total += data.made;
 				divideBy += 1;
 			}
@@ -104,6 +104,8 @@
 
 				await loadShiftTimes();
 				await loadLocations();
+
+				updateAverage();
 			}
 		});
 
@@ -135,8 +137,7 @@
 					class="rounded-lg relative block w-full px-3 py-2 bg-stone-600 border border-gray-800 text-gray-50 rounded-t-md focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 sm:text-sm"
 					bind:value={dayOfWeek}
 				>
-					<option value="SELECT" selected hidden>Select day of week</option>
-					<option value="NONE">None</option>
+					<option value="NONE" selected>None</option>
 
 					{#each daysOfWeek as d}
 						<option value={d}>{d}</option>
@@ -150,8 +151,7 @@
 					placeholder="Select"
 					bind:value={shiftTime}
 				>
-					<option value="SELECT" selected hidden>Select shift time</option>
-					<option value="NONE">None</option>
+					<option value="NONE" selected>None</option>
 
 					{#each shiftTimesArray as st}
 						<option value={st.id}
@@ -166,8 +166,7 @@
 					class="rounded-lg relative block w-full px-3 py-2 bg-stone-600 border border-gray-800 text-gray-50 rounded-t-md focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 sm:text-sm"
 					bind:value={location}
 				>
-					<option value="SELECT" selected hidden>Select location</option>
-					<option value="NONE">None</option>
+					<option value="NONE" selected>None</option>
 
 					{#each locationsArray as lc}
 						<option value={lc.id}>{lc.name}</option>
